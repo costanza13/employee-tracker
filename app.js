@@ -1,8 +1,10 @@
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
-const db = require('./db/connection');
+const cTable = require('console.table');
+const mysql = require('mysql2/promise');
+require('dotenv').config();
+const { Department } = require('./models');
 
-
+let db;
 
 const actionPrompts = [
   {
@@ -37,9 +39,12 @@ function init() {
     .then(actionData => {
       switch (actionData.action) {
         case 'View all departments':
-          console.log('action: ' + actionData.action);
-          console.log('Fetch department data');
-          init();
+          const department = new Department(db);
+          department.fetchAll()
+            .then(([rows, fields]) => {
+              console.log('\n' + cTable.getTable('Departments', rows) + '\n');
+              init();
+            });
           break;
 
         case 'View all roles':
@@ -52,8 +57,24 @@ function init() {
         case 'Add a department':
           inquirer.prompt(departmentPrompts)
             .then(departmentData => {
-              console.log('Store new department', departmentData);
-              init();  // return to the action menu
+              if (departmentData !== '') {
+                const department = new Department(db);
+                department.add(departmentData.name)
+                  .then(([result, junk]) => {
+                    if (result.affectedRows) {
+                      console.log(`\nAdded ${departmentData.name} department.\n`);
+                    } else {
+                      console.log(`\nUnable to add ${departmentData.name} department.\n`)
+                    }
+                    init();  // return to the action menu
+                  })
+                  .catch(err => {
+                    console.log(`\nUnable to add ${departmentData.name} department. [ ${err} ]\n`)
+                    init();  // return to the action menu
+                  });
+              } else {
+                init();
+              }
             });
           break;
 
@@ -63,7 +84,7 @@ function init() {
           console.log('action: ' + actionData.action);
           init();
           break;
-        
+
         case 'EXIT':
           process.exit(0);
       }
@@ -73,9 +94,15 @@ function init() {
     });
 }
 
-db.connect(err => {
-  if (err) throw err;
-  console.log('Database connected.');
 
-  init();
-});
+mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: 'employees'
+})
+  .then(conn => {
+    db = conn;
+    console.log('Connected to employees database');
+    init();
+  });
