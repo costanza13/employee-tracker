@@ -6,7 +6,7 @@ class Role {
   }
 
   fetchAll() {
-    const sql = 'SELECT r.id, r.title, r.salary, d.name FROM role r LEFT JOIN department d ON d.id = r.department_id';
+    const sql = 'SELECT r.id, r.title, r.salary, d.name AS department FROM role r LEFT JOIN department d ON d.id = r.department_id';
     return this.db.query(sql)
     .then(([rows, junk]) => {
       return rows;

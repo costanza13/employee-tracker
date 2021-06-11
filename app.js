@@ -2,7 +2,7 @@ const inquirer = require('inquirer');
 const cTable = require('console.table');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
-const { Department, Role } = require('./models');
+const { Department, Role, Employee } = require('./models');
 
 let db;
 let department;
@@ -14,6 +14,7 @@ const actionPrompts = [
     name: 'action',
     loop: false,
     message: 'What would you like to do?',
+    loop: false,
     choices:
       [
         'View all departments',
@@ -28,7 +29,7 @@ const actionPrompts = [
   }
 ];
 
-const departmentPrompts = [
+const newDepartmentPrompts = [
   {
     type: 'input',
     name: 'name',
@@ -36,7 +37,7 @@ const departmentPrompts = [
   }
 ];
 
-const rolePrompts = [
+const newRolePrompts = [
   {
     type: 'input',
     name: 'title',
@@ -62,8 +63,53 @@ const rolePrompts = [
     name: 'department',
     message: 'Which department does this role belong to?',
     choices: [],
+    loop: false,
     when: ({ title }) => {
       return title.trim() !== '';
+    }
+  }
+];
+
+const newEmployeePrompts = [
+  {
+    type: 'input',
+    name: 'firstName',
+    message: "What is the new employee's first name? (leave blank to cancel)",
+  },
+  {
+    type: 'input',
+    name: 'lastName',
+    message: "What is the employee's last name?",
+    validate: lastNameInput => {
+      if (lastNameInput.trim() === '') {
+        console.log("Please enter a last name.");
+        return false;
+      }
+      return true;
+    },
+    when: ({ firstName }) => {
+      return firstName.trim() !== '';
+    }
+  },
+  {
+    type: 'list',
+    name: 'role',
+    message: "What is the employee's title?",
+    choices: [],
+    loop: false,
+    when: ({ firstName }) => {
+      return firstName.trim() !== '';
+    }
+  },
+  {
+    type: 'list',
+    name: 'manager',
+    message: 'Who does this employee report to?',
+    choices: [],
+    loop: false,
+    default: 0,
+    when: ({ firstName }) => {
+      return firstName.trim() !== '';
     }
   }
 ];
@@ -77,7 +123,7 @@ function init() {
           department.fetchAll()
             .then(departments => {
               console.log('\n' + cTable.getTable('Departments', departments));
-              init();
+              init();  // return to the action menu
             });
           break;
 
@@ -85,18 +131,20 @@ function init() {
           role.fetchAll()
             .then(roles => {
               console.log('\n' + cTable.getTable('Roles', roles));
-              init();
+              init();  // return to the action menu
             });
           break;
 
         case 'View all employees':
-          console.log('action: ' + actionData.action);
-          console.log('Fetch data from db...');
-          init();  // return to the action menu
+          employee.fetchAll()
+            .then(employees => {
+              console.log('\n' + cTable.getTable('Employees', employees));
+              init();  // return to the action menu
+            });
           break;
 
         case 'Add a department':
-          inquirer.prompt(departmentPrompts)
+          inquirer.prompt(newDepartmentPrompts)
             .then(departmentData => {
               if (departmentData.name !== '') {
                 department.add(departmentData.name)
@@ -114,9 +162,9 @@ function init() {
           department.fetchAll()
             .then(departments => {
               for (let i = 0; i < departments.length; i++) {
-                rolePrompts[2].choices.push({ name: departments[i].name, value: departments[i].id });
+                newRolePrompts[2].choices.push({ name: departments[i].name, value: departments[i].id });
               }
-              inquirer.prompt(rolePrompts)
+              inquirer.prompt(newRolePrompts)
                 .then(roleData => {
                   if (roleData.title !== '') {
                     role.add(roleData)
@@ -128,11 +176,38 @@ function init() {
                     init();  // return to the action menu
                   }
                 });
-            })
+            });
           break;
 
         case 'Add an employee':
-        case 'Update an employee':
+          role.fetchAll()
+            .then(roles => {
+              for (let i = 0; i < roles.length; i++) {
+                newEmployeePrompts[2].choices.push({ name: roles[i].title, value: roles[i].id });
+              }
+              employee.fetchAll()
+                .then(managers => {
+                  for (let i = 0; i < managers.length; i++) {
+                    newEmployeePrompts[3].choices.push({ name: managers[i].first_name + ' ' + managers[i].last_name, value: managers[i].id });
+                  }
+                  newEmployeePrompts[3].choices.push({ name: '<none>', value: 0 });
+                  inquirer.prompt(newEmployeePrompts)
+                    .then(employeeData => {
+                      if (employeeData.firstName !== '') {
+                        employee.add(employeeData)
+                          .then(({ message }) => {
+                            console.log(`\n${message}`)
+                            init();  // return to the action menu
+                          });
+                      } else {
+                        init();  // return to the action menu
+                      }
+                    });
+                });
+            });
+          break;
+
+        case 'Update an employee role':
           console.log('action: ' + actionData.action);
           init();
           break;
@@ -158,6 +233,7 @@ mysql.createConnection({
 
     department = new Department(db);
     role = new Role(db);
+    employee = new Employee(db);
 
     console.log('Connected to employees database');
     init();
