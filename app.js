@@ -114,6 +114,31 @@ const newEmployeePrompts = [
   }
 ];
 
+const updateEmployeePrompts = [
+  {
+    type: 'list',
+    name: 'employee',
+    message: "Which employee would you like to update?",
+    loop: false,
+    choices: []
+  },
+  {
+    type: 'list',
+    name: 'role',
+    message: "Select the employee's new role:",
+    choices: [],
+    loop: false
+  },
+  {
+    type: 'list',
+    name: 'manager',
+    message: "Select the employee's new manager:",
+    choices: [],
+    loop: false,
+    default: 0
+  }
+];
+
 function init() {
   console.log('');
   inquirer.prompt(actionPrompts)
@@ -194,7 +219,7 @@ function init() {
                   inquirer.prompt(newEmployeePrompts)
                     .then(employeeData => {
                       if (employeeData.firstName !== '') {
-                        employee.add(employeeData)
+                        employee.add({ first_name: employeeData.firstName, last_name: employeeData.lastName, role_id: employeeData.role, manager_id: employeeData.manager })
                           .then(({ message }) => {
                             console.log(`\n${message}`)
                             init();  // return to the action menu
@@ -209,10 +234,32 @@ function init() {
 
         case 'Update an employee role':
           console.log('action: ' + actionData.action);
-          init();
+          employee.fetchAll()
+            .then(employees => {
+              for (let i = 0; i < employees.length; i++) {
+                updateEmployeePrompts[0].choices.push({ name: employees[i].first_name + ' ' + employees[i].last_name, value: employees[i].id });
+                updateEmployeePrompts[2].choices.push({ name: employees[i].first_name + ' ' + employees[i].last_name, value: employees[i].id });
+              }
+              updateEmployeePrompts[2].choices.push({ name: '<none>', value: 0 });
+              role.fetchAll()
+                .then(roles => {
+                  for (let i = 0; i < roles.length; i++) {
+                    updateEmployeePrompts[1].choices.push({ name: roles[i].title, value: roles[i].id });
+                  }
+                  inquirer.prompt(updateEmployeePrompts)
+                    .then(employeeData => {
+                      employee.update({ id: employeeData.employee, role_id: employeeData.role, manager_id: employeeData.manager })
+                        .then(({ message }) => {
+                          console.log(`\n${message}`)
+                          init();  // return to the action menu
+                        });
+                    });
+                });
+            });
           break;
 
         case '__EXIT__':
+          console.log('\nHave a nice day!\n');
           process.exit(0);
       }
     })
