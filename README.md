@@ -14,7 +14,7 @@ THEN I am presented with the following options: view all departments, view all r
 * WHEN I choose to view all departments<br>
 THEN I am presented with a formatted table showing department names and department ids
 * WHEN I choose to view all roles<br>
-THEN I am presented with the job title, role id, the department that role belongs to, and the salary for that role
+THEN I am presented with the job title, role id, the department each role belongs to, and the salary for each role
 * WHEN I choose to view all employees<br>
 THEN I am presented with a formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
 * WHEN I choose to add a department<br>

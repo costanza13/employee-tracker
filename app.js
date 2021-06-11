@@ -2,9 +2,11 @@ const inquirer = require('inquirer');
 const cTable = require('console.table');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
-const { Department } = require('./models');
+const { Department, Role } = require('./models');
 
 let db;
+let department;
+let role;
 
 const actionPrompts = [
   {
@@ -21,7 +23,7 @@ const actionPrompts = [
         'Add a role',
         'Add an employee',
         'Update an employee role',
-        'EXIT'
+        '__EXIT__'
       ]
   }
 ];
@@ -34,42 +36,72 @@ const departmentPrompts = [
   }
 ];
 
+const rolePrompts = [
+  {
+    type: 'input',
+    name: 'title',
+    message: 'What is the title of the new role? (leave blank to cancel)',
+  },
+  {
+    type: 'input',
+    name: 'salary',
+    message: 'What is the salary for this role?',
+    validate: salaryInput => {
+      if (parseInt(salaryInput) === NaN) {
+        console.log('Please enter a number for the salary.');
+        return false;
+      }
+      return true;
+    },
+    when: ({ title }) => {
+      return title.trim() !== '';
+    }
+  },
+  {
+    type: 'list',
+    name: 'department',
+    message: 'Which department does this role belong to?',
+    choices: [],
+    when: ({ title }) => {
+      return title.trim() !== '';
+    }
+  }
+];
+
 function init() {
+  console.log('');
   inquirer.prompt(actionPrompts)
     .then(actionData => {
       switch (actionData.action) {
         case 'View all departments':
-          const department = new Department(db);
           department.fetchAll()
-            .then(([rows, fields]) => {
-              console.log('\n' + cTable.getTable('Departments', rows) + '\n');
+            .then(departments => {
+              console.log('\n' + cTable.getTable('Departments', departments));
               init();
             });
           break;
 
         case 'View all roles':
+          role.fetchAll()
+            .then(roles => {
+              console.log('\n' + cTable.getTable('Roles', roles));
+              init();
+            });
+          break;
+
         case 'View all employees':
           console.log('action: ' + actionData.action);
           console.log('Fetch data from db...');
-          init();
+          init();  // return to the action menu
           break;
 
         case 'Add a department':
           inquirer.prompt(departmentPrompts)
             .then(departmentData => {
-              if (departmentData !== '') {
-                const department = new Department(db);
+              if (departmentData.name !== '') {
                 department.add(departmentData.name)
-                  .then(([result, junk]) => {
-                    if (result.affectedRows) {
-                      console.log(`\nAdded ${departmentData.name} department.\n`);
-                    } else {
-                      console.log(`\nUnable to add ${departmentData.name} department.\n`)
-                    }
-                    init();  // return to the action menu
-                  })
-                  .catch(err => {
-                    console.log(`\nUnable to add ${departmentData.name} department. [ ${err} ]\n`)
+                  .then(({ message }) => {
+                    console.log(`\n${message}`)
                     init();  // return to the action menu
                   });
               } else {
@@ -79,13 +111,33 @@ function init() {
           break;
 
         case 'Add a role':
+          department.fetchAll()
+            .then(departments => {
+              for (let i = 0; i < departments.length; i++) {
+                rolePrompts[2].choices.push({ name: departments[i].name, value: departments[i].id });
+              }
+              inquirer.prompt(rolePrompts)
+                .then(roleData => {
+                  if (roleData.title !== '') {
+                    role.add(roleData)
+                      .then(({ message }) => {
+                        console.log(`\n${message}`)
+                        init();  // return to the action menu
+                      });
+                  } else {
+                    init();  // return to the action menu
+                  }
+                });
+            })
+          break;
+
         case 'Add an employee':
         case 'Update an employee':
           console.log('action: ' + actionData.action);
           init();
           break;
 
-        case 'EXIT':
+        case '__EXIT__':
           process.exit(0);
       }
     })
@@ -103,6 +155,10 @@ mysql.createConnection({
 })
   .then(conn => {
     db = conn;
+
+    department = new Department(db);
+    role = new Role(db);
+
     console.log('Connected to employees database');
     init();
   });
