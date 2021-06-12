@@ -29,6 +29,21 @@ class Role {
       return { status: 'error', message: `Unable to add ${roleData.title} role. [ ${err} ]`}
     });
   }
+
+  delete(id) {
+    return this.db.query('DELETE FROM role WHERE id = ?', [id])
+      .then(([result, junk]) => {
+        if (result.affectedRows) {
+          return { status: 'success', message: `Deleted role ${id}.` }
+        } else {
+          return { status: 'error', message: `Unable to delete role ${id}.` }
+        }
+        return result;
+      })
+      .catch(err => {
+        return { status: 'error', message: `Unable to delete role ${id}. [ ${err} ]` }
+      });
+  }
 };
 
 

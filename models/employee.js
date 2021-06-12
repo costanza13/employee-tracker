@@ -108,7 +108,7 @@ class Employee {
         return result;
       })
       .catch(err => {
-        return { status: 'error', message: `Unable to Delete employee ${id}. [ ${err} ]` }
+        return { status: 'error', message: `Unable to delete employee ${id}. [ ${err} ]` }
       });
   }
 };
