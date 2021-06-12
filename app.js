@@ -19,6 +19,7 @@ const mainPrompts = [
         'Update an employee',
         'Delete an employee',
         'View all departments',
+        'View department budget',
         'Add a department',
         'Delete a department',
         'View all roles',
@@ -52,6 +53,10 @@ function mainMenu() {
 
         case 'View all departments':
           Departments.viewDepartments(db).then(mainMenu);  // return to the action menu
+          break;
+
+        case 'View department budget':
+          Departments.viewBudget(db).then(mainMenu);  // return to the action menu
           break;
 
         case 'Add a department':

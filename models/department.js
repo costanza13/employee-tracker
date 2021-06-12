@@ -45,13 +45,20 @@ class Department {
   }
 
   showBudget(id) {
-    const sql = 'SELECT * FROM departments';
-    return this.db.query(sql)
+    let sql = `SELECT d.id, d.name, IFNULL(SUM(r.salary), 0) AS budget
+               FROM department d
+               LEFT JOIN role r ON r.department_id = d.id`;
+    const params = [];
+    if (id !== 0) {
+      sql += ' WHERE d.id = ?';
+      params.push(id);
+    }
+    sql += ' GROUP BY d.id';
+    return this.db.query(sql, params)
       .then(([rows, junk]) => {
         return rows;
       });
   }
 };
-
 
 module.exports = Department;
