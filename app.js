@@ -23,7 +23,7 @@ const actionPrompts = [
         'Add a department',
         'Add a role',
         'Add an employee',
-        'Update an employee role',
+        'Update an employee',
         '__EXIT__'
       ]
   }
@@ -232,7 +232,7 @@ function init() {
             });
           break;
 
-        case 'Update an employee role':
+        case 'Update an employee':
           console.log('action: ' + actionData.action);
           employee.fetchAll()
             .then(employees => {
