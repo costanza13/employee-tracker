@@ -65,9 +65,23 @@ class Employee {
   }
 
   update({ id, role_id, manager_id }) {
-    const sql = 'UPDATE employee SET role_id = ?, manager_id = ? WHERE id = ?';
-    if (manager_id === 0) manager_id = null;
-    const params = [role_id, manager_id, id]
+    if (role_id === undefined && manager_id === undefined) {
+      return { status: 'success', message: `Employee ${id} not updated.` };
+    }
+    const params = [];
+    const sets = [];
+    let sql = 'UPDATE employee SET ';
+    if (role_id !== undefined) {
+      sets.push('role_id = ?');
+      params.push(role_id);
+    }
+    if (manager_id !== undefined) {
+      if (manager_id === 0) manager_id = null;
+      sets.push('manager_id = ?');
+      params.push(manager_id);
+    }
+    sql += sets.join(', ') + ' WHERE id = ?';
+    params.push(id);
 
     return this.db.query(sql, params)
       .then(([result, junk]) => {
@@ -85,17 +99,17 @@ class Employee {
 
   delete(id) {
     return this.db.query('DELETE FROM employee WHERE id = ?', [id])
-    .then(([result, junk]) => {
-      if (result.affectedRows) {
-        return { status: 'success', message: `Deleted employee ${id}.` }
-      } else {
-        return { status: 'error', message: `Unable to delete employee ${id}.` }
-      }
-      return result;
-    })
-    .catch(err => {
-      return { status: 'error', message: `Unable to Delete employee ${id}. [ ${err} ]` }
-  });
+      .then(([result, junk]) => {
+        if (result.affectedRows) {
+          return { status: 'success', message: `Deleted employee ${id}.` }
+        } else {
+          return { status: 'error', message: `Unable to delete employee ${id}.` }
+        }
+        return result;
+      })
+      .catch(err => {
+        return { status: 'error', message: `Unable to Delete employee ${id}. [ ${err} ]` }
+      });
   }
 };
 
