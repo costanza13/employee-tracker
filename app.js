@@ -16,11 +16,12 @@ const mainPrompts = [
       [
         'View all departments',
         'View all roles',
-        'View all employees',
+        'View employees',
         'Add a department',
         'Add a role',
         'Add an employee',
         'Update an employee',
+        'Delete an employee',
         '__EXIT__'
       ]
   }
@@ -39,7 +40,7 @@ function mainMenu() {
           Roles.viewRoles(db).then(mainMenu);  // return to the action menu
           break;
 
-        case 'View all employees':
+        case 'View employees':
           Employees.viewEmployees(db).then(mainMenu);  // return to the action menu
           break;
 
@@ -57,6 +58,10 @@ function mainMenu() {
 
         case 'Update an employee':
           Employees.updateEmployee(db).then(mainMenu);  // return to the action menu
+          break;
+
+        case 'Delete an employee':
+          Employees.deleteEmployee(db).then(mainMenu);  // return to the action menu
           break;
 
         case '__EXIT__':
