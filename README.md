@@ -33,7 +33,6 @@ A tool for business owners to help organize and plan their business. The app pre
 
 <a href="https://drive.google.com/file/d/11fubtKaMKefzTx1AaVVv9h135qX6FlzD/view?usp=sharing"><img src="./assets/images/Employee-Tracker-Demo.gif"></a>
 
-* View a demo video [here](https://drive.google.com/file/d/11fubtKaMKefzTx1AaVVv9h135qX6FlzD/view?usp=sharing)
 
 ## Technologies Used
 * Node.js
@@ -50,3 +49,5 @@ This app uses the following very helpful NPM packages:
 Hat-tip to [Manytools](<a href="https://manytools.org/hacker-tools/ascii-banner/"></a>) for the cool ASCII banner creator.
 
 ## Links
+* GitHub: [Employee Tracker](https://github.com/costanza13/employee-tracker)
+* [Demo video](https://drive.google.com/file/d/11fubtKaMKefzTx1AaVVv9h135qX6FlzD/view?usp=sharing)
