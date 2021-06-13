@@ -1,7 +1,7 @@
 {
   "name": "12_employee-tracker",
   "version": "1.0.0",
-  "description": "AS A business owner I WANT to be able to view and manage the departments, roles, and employees in my company SO THAT I can organize and plan my business",
+  "description": "An app to help business owners view and manage their company's departments, roles, and employees",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -10,22 +10,26 @@ const mainPrompts = [
     type: 'list',
     name: 'action',
     loop: false,
-    message: 'What would you like to do?',
+    message: '──────────────-\n     Main Menu   \n  -──────────────\n',
     loop: false,
+    pageSize: 20,
     choices:
       [
         'View employees',
         'Add an employee',
         'Update an employee',
         'Delete an employee',
-        'View all departments',
+        new inquirer.Separator(' '),
+        'View departments',
         'View department budget',
         'Add a department',
         'Delete a department',
-        'View all roles',
+        new inquirer.Separator(' '),
+        'View roles',
         'Add a role',
         'Delete a role',
-        '__EXIT__'
+        new inquirer.Separator(' '),
+        '__EXIT__',
       ]
   }
 ];
@@ -51,7 +55,7 @@ function mainMenu() {
           Employees.deleteEmployee(db).then(mainMenu);  // return to the action menu
           break;
 
-        case 'View all departments':
+        case 'View departments':
           Departments.viewDepartments(db).then(mainMenu);  // return to the action menu
           break;
 
@@ -67,7 +71,7 @@ function mainMenu() {
           Departments.deleteDepartment(db).then(mainMenu);  // return to the action menu
           break;
 
-        case 'View all roles':
+        case 'View roles':
           Roles.viewRoles(db).then(mainMenu);  // return to the action menu
           break;
 
@@ -79,7 +83,7 @@ function mainMenu() {
           Roles.deleteRole(db).then(mainMenu);  // return to the action menu
           break;
 
-        case '__EXIT__':
+        default:
           console.log('\nHave a nice day!\n');
           process.exit(0);
       }
@@ -98,6 +102,27 @@ mysql.createConnection({
 })
   .then(conn => {
     db = conn;
-    console.log('Connected to employees database');
+    // console.log('Connected to employees database');
+    console.clear();
+    console.log(`
+   ------------------------------------------------------------------------------------
+   ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+   :'########:'##::::'##:'########::'##::::::::'#######::'##:::'##:'########:'########:
+   : ##.....:: ###::'###: ##.... ##: ##:::::::'##.... ##:. ##:'##:: ##.....:: ##.....::
+   : ##::::::: ####'####: ##:::: ##: ##::::::: ##:::: ##::. ####::: ##::::::: ##:::::::
+   : ######::: ## ### ##: ########:: ##::::::: ##:::: ##:::. ##:::: ######::: ######:::
+   : ##...:::: ##. #: ##: ##.....::: ##::::::: ##:::: ##:::: ##:::: ##...:::: ##...::::
+   : ##::::::: ##:.:: ##: ##:::::::: ##::::::: ##:::: ##:::: ##:::: ##::::::: ##:::::::
+   : ########: ##:::: ##: ##:::::::: ########:. #######::::: ##:::: ########: ########:
+   :........::..:::::..::..:::::::::........:::.......::::::..:::::........::........::
+   :::::'##::::'##::::'###::::'##::: ##::::'###:::::'######:::'########:'########::::::
+   ::::: ###::'###:::'## ##::: ###:: ##:::'## ##:::'##... ##:: ##.....:: ##.... ##:::::
+   ::::: ####'####::'##:. ##:: ####: ##::'##:. ##:: ##:::..::: ##::::::: ##:::: ##:::::        
+   ::::: ## ### ##:'##:::. ##: ## ## ##:'##:::. ##: ##::'####: ######::: ########::::::
+   ::::: ##. #: ##: #########: ##. ####: #########: ##::: ##:: ##...:::: ##.. ##:::::::    
+   ::::: ##:.:: ##: ##.... ##: ##:. ###: ##.... ##: ##::: ##:: ##::::::: ##::. ##::::::    
+   ::::: ##:::: ##: ##:::: ##: ##::. ##: ##:::: ##:. ######::: ########: ##:::. ##:::::    
+   ::::: ..:::::..::..:::::..::..::::..::..:::::..:::......::::........::..:::::..:::::
+   ------------------------------------------------------------------------------------`);
     mainMenu();
   });
