@@ -31,7 +31,9 @@ A tool for business owners to help organize and plan their business. The app pre
 ## Running Employee Tracker
 - Run `npm start` from the project's root directory and follow the prompts
 
+<a href="https://drive.google.com/file/d/11fubtKaMKefzTx1AaVVv9h135qX6FlzD/view?usp=sharing"><img src="./assets/images/Employee-Tracker-Demo.gif"></a>
 
+* View a demo video [here](https://drive.google.com/file/d/11fubtKaMKefzTx1AaVVv9h135qX6FlzD/view?usp=sharing)
 
 ## Technologies Used
 * Node.js
